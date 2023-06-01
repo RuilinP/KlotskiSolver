@@ -41,35 +41,158 @@ class Piece:
 
     def move(self, direction):
         if direction == "up":
-            if check_coord(self.coord_x, self.coord_y-1):
+            if self._check_coord(direction):
                 self.coord_y -= 1
             else:
                 print("Invalid move")
         elif direction == "down":
-            if check_coord(self.coord_x, self.coord_y+1):
+            if self._check_coord(direction):
                 self.coord_y += 1
             else:
                 print("Invalid move")
         elif direction == "left":
-            if check_coord(self.coord_x-1, self.coord_y):
+            if self._check_coord(direction):
                 self.coord_x -= 1
             else:
                 print("Invalid move")
         elif direction == "right":
-            if check_coord(self.coord_x+1, self.coord_y):
+            if self._check_coord(direction):
                 self.coord_x += 1
             else:
                 print("Invalid move")
+    
 
-def check_coord(coord_x, coord_y):
-    return coord_x > -1 and coord_x < 4 and coord_y > -1 and coord_y < 5
+    def _check_coord(self, direction):
+        """
+        Check the new coord of the piece, return True if valid, False otherwise
+        """
+        if self.is_goal: #caocao
+            if self.coord_y == 0 and direction == "up":
+                return False
+            elif self.coord_y == 3 and direction == "down":
+                return False
+            elif self.coord_x == 0 and direction == "left":
+                return False
+            elif self.coord_x == 2 and direction == "right":
+                return False
+            return True
+        elif self.orientation == 'h': #horizontal general
+            if self.coord_y == 0 and direction == "up":
+                return False
+            elif self.coord_y == 4 and direction == "down":
+                return False
+            elif self.coord_x == 0 and direction == "left":
+                return False
+            elif self.coord_x == 2 and direction == "right":
+                return False
+            return True
+        elif self.orientation == 'v': #vertical general
+            if self.coord_y == 0 and direction == "up":
+                return False
+            elif self.coord_y == 3 and direction == "down":
+                return False
+            elif self.coord_x == 0 and direction == "left":
+                return False
+            elif self.coord_x == 3 and direction == "right":
+                return False
+            return True
+        else: #soldier
+            if self.coord_y == 0 and direction == "up":
+                return False
+            elif self.coord_y == 4 and direction == "down":
+                return False
+            elif self.coord_x == 0 and direction == "left":
+                return False
+            elif self.coord_x == 3 and direction == "right":
+                return False
+            return True
+
+
+    
+
+
+
+
+
+class Board:
+    """
+    Board class for setting up the playing board.
+    """
+
+    def __init__(self, pieces):
+        """
+        :param pieces: The list of Pieces
+        :type pieces: List[Piece]
+        """
+
+        self.width = 4
+        self.height = 5
+
+        self.pieces = pieces
+
+        # self.grid is a 2-d (size * size) array automatically generated
+        # using the information on the pieces when a board is being created.
+        # A grid contains the symbol for representing the pieces on the board.
+        self.grid = []
+        self.__construct_grid()
+
+
+    def __construct_grid(self):
+        """
+        Called in __init__ to set up a 2-d grid based on the piece location information.
+
+        """
+
+        for i in range(self.height):
+            line = []
+            for j in range(self.width):
+                line.append('.')
+            self.grid.append(line)
+
+        for piece in self.pieces:
+            if piece.is_goal:
+                self.grid[piece.coord_y][piece.coord_x] = char_goal
+                self.grid[piece.coord_y][piece.coord_x + 1] = char_goal
+                self.grid[piece.coord_y + 1][piece.coord_x] = char_goal
+                self.grid[piece.coord_y + 1][piece.coord_x + 1] = char_goal
+            elif piece.is_single:
+                self.grid[piece.coord_y][piece.coord_x] = char_single
+            else:
+                if piece.orientation == 'h':
+                    self.grid[piece.coord_y][piece.coord_x] = '<'
+                    self.grid[piece.coord_y][piece.coord_x + 1] = '>'
+                elif piece.orientation == 'v':
+                    self.grid[piece.coord_y][piece.coord_x] = '^'
+                    self.grid[piece.coord_y + 1][piece.coord_x] = 'v'
+
+    def display(self):
+        """
+        Print out the current board.
+
+        """
+        for i, line in enumerate(self.grid):
+            for ch in line:
+                print(ch, end='')
+            print()
+
+
+
+
+# def check_coord(coord_x, coord_y):
+#     return coord_x > -1 and coord_x < 4 and coord_y > -1 and coord_y < 5
 
 
     
 
 
 if __name__ == "__main__":
-    Cao = Piece(True, False, 0, 0, None)
-    Cao.move("right")
-    Cao.move("down")
-    print(Cao)
+    caocao = Piece(True, False, 0, 0, None)
+    zhangfei = Piece(False, False, 0, 2, 'h')
+    caocao.move("left")
+    caocao.move("down")
+    caocao.move("down")
+    caocao.move("down")
+    caocao.move("down")
+    # caocao.move("down")
+    print(caocao)
+    #board1 = Board()
