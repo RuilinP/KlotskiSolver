@@ -103,6 +103,8 @@ class Board:
                     self.grid[piece.coord_y][piece.coord_x] = '^'
                     self.grid[piece.coord_y + 1][piece.coord_x] = 'v'
 
+    
+
     def display(self):
         """
         Print out the current board.
@@ -252,10 +254,10 @@ def legal_move_check(i, board, direction):
         # above is check for border of the board
         if direction == "up":
             e = [(board.pieces[i].coord_x, board.pieces[i].coord_y-1)]
-            return (x0, y0) in e and (x1, y1) in e
+            return (x0, y0) in e or (x1, y1) in e
         elif direction == "down":
             e = [(board.pieces[i].coord_x, board.pieces[i].coord_y+2)]
-            return (x0, y0) in e and (x1, y1) in e
+            return (x0, y0) in e or (x1, y1) in e
         elif direction == "left":
             e = [(board.pieces[i].coord_x-1, board.pieces[i].coord_y), (board.pieces[i].coord_x-1, board.pieces[i].coord_y+1)]
             return (x0, y0) in e and (x1, y1) in e
@@ -280,10 +282,10 @@ def legal_move_check(i, board, direction):
             return (x0, y0) in e and (x1, y1) in e
         elif direction == "left":
             e = [(board.pieces[i].coord_x-1, board.pieces[i].coord_y)]
-            return (x0, y0) in e and (x1, y1) in e
+            return (x0, y0) in e or (x1, y1) in e
         elif direction == "right":
             e = [(board.pieces[i].coord_x+2, board.pieces[i].coord_y)]
-            return (x0, y0) in e and (x1, y1) in e
+            return (x0, y0) in e or (x1, y1) in e
     else: # piece is a soldier
         if board.pieces[i].coord_y == 0 and direction == "up":  
             return False  
@@ -296,32 +298,44 @@ def legal_move_check(i, board, direction):
         # above is check for border of the board
         if direction == "up":
             e = [ (board.pieces[i].coord_x, board.pieces[i].coord_y-1)]
-            return (x0, y0) in e and (x1, y1) in e
+            return (x0, y0) in e or (x1, y1) in e
         elif direction == "down":
             e = [(board.pieces[i].coord_x, board.pieces[i].coord_y+1)]
-            return (x0, y0) in e and (x1, y1) in e
+            return (x0, y0) in e or (x1, y1) in e
         elif direction == "left":
             e = [(board.pieces[i].coord_x-1, board.pieces[i].coord_y)]
-            return (x0, y0) in e and (x1, y1) in e
+            return (x0, y0) in e or (x1, y1) in e
         elif direction == "right":
             e = [(board.pieces[i].coord_x+2, board.pieces[i].coord_y)]
-            return (x0, y0) in e and (x1, y1) in e
+            return (x0, y0) in e or (x1, y1) in e
 
 
 
 def dfs(state0):
-    
-    # Check four direction for moveable piece of each empty spot
+    frontier = []
+    # Check four direction of each piece to see if movement can be made
     # but stop once one moveable piece is found
     for i in range(10):
         if legal_move_check(i, state0.board, "left"):
             board.pieces[i].move("left")
+            new_board = Board(board.pieces)
+            break
         elif legal_move_check(i, state0.board, "up"):
             board.pieces[i].move("up")
+            new_board = Board(board.pieces)
+            break
         elif legal_move_check(i, state0.board, "right"):
             board.pieces[i].move("right")
-        else:
+            new_board = Board(board.pieces)
+            break
+        elif legal_move_check(i, state0.board, "down"):
             board.pieces[i].move("down")
+            new_board = Board(board.pieces)
+            break
+    new_board.display()
+    new_state = State(new_board, state0.f+1, state0.depth+1)
+    if new_state not in frontier:
+        frontier.append(new_state)
 
 
 
@@ -398,9 +412,10 @@ if __name__ == "__main__":
     
 
     #read the board from the file
-    board = read_from_file("testhrd_easy1.txt")
+    board = read_from_file("testhrd_med1.txt")
     board.display()
     state0 = State(board, 0, 0)
-    print(is_goal(state0))
-    #dfs(state0)
-    print(legal_move_check(9, board, "up"))
+    #print(is_goal(state0))
+    print("\n")
+    dfs(state0)
+    #print(legal_move_check(9, board, "up"))
