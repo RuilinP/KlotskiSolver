@@ -286,7 +286,7 @@ def legal_move_check(i, board, direction):
         elif direction == "right":
             e = [(board.pieces[i].coord_x+2, board.pieces[i].coord_y)]
             return (x0, y0) in e or (x1, y1) in e
-    else: # piece is a soldier
+    elif board.pieces[i].is_single: # piece is a soldier
         if board.pieces[i].coord_y == 0 and direction == "up":  
             return False  
         elif board.pieces[i].coord_y == 4 and direction == "down":  
@@ -312,31 +312,74 @@ def legal_move_check(i, board, direction):
 
 
 def dfs(state0):
-    frontier = []
-    # Check four direction of each piece to see if movement can be made
-    # but stop once one moveable piece is found
-    for i in range(10):
-        if legal_move_check(i, state0.board, "left"):
-            board.pieces[i].move("left")
-            new_board = Board(board.pieces)
-            break
-        elif legal_move_check(i, state0.board, "up"):
-            board.pieces[i].move("up")
-            new_board = Board(board.pieces)
-            break
-        elif legal_move_check(i, state0.board, "right"):
-            board.pieces[i].move("right")
-            new_board = Board(board.pieces)
-            break
-        elif legal_move_check(i, state0.board, "down"):
-            board.pieces[i].move("down")
-            new_board = Board(board.pieces)
-            break
-    new_board.display()
-    new_state = State(new_board, state0.f+1, state0.depth+1)
-    if new_state not in frontier:
-        frontier.append(new_state)
+    frontier = [state0]
+    visited = [state0]
+    while frontier != []:
+        state0 = frontier.pop()
+        for i in range(10):
+            if legal_move_check(i, state0.board, "left"):
+                state0.board.pieces[i].move("left")
+                new_board = Board(state0.board.pieces)
+                new_state = State(new_board, state0.f+1, state0.depth+1)
+                if pruning(visited, new_state):#pruning
+                    frontier.append(new_state)
+                    visited.append(new_state)
+                    state0 = new_state
+                    print("\n \n")
+                    new_board.display()
+                    break
+                else: 
+                    state0.board.pieces[i].move("right")
+            elif legal_move_check(i, state0.board, "up"):
+                state0.board.pieces[i].move("up")
+                new_board = Board(state0.board.pieces)
+                new_state = State(new_board, state0.f+1, state0.depth+1)
+                if pruning(visited, new_state):#pruning
+                    frontier.append(new_state)
+                    visited.append(new_state)
+                    state0 = new_state
+                    print("\n \n")
+                    new_board.display()
+                    break
+                else:
+                    state0.board.pieces[i].move("down")
+            elif legal_move_check(i, state0.board, "right"):
+                state0.board.pieces[i].move("right")
+                new_board = Board(state0.board.pieces)
+                new_state = State(new_board, state0.f+1, state0.depth+1)
+                if pruning(visited, new_state):#pruning
+                    frontier.append(new_state)
+                    visited.append(new_state)
+                    state0 = new_state
+                    print("\n \n")
+                    new_board.display()
+                    break
+                else:
+                    state0.board.pieces[i].move("left")
+            elif legal_move_check(i, state0.board, "down"):
+                state0.board.pieces[i].move("down")
+                new_board = Board(state0.board.pieces)
+                new_state = State(new_board, state0.f+1, state0.depth+1)
+                if pruning(visited, new_state):#pruning
+                    frontier.append(new_state)
+                    visited.append(new_state)
+                    state0 = new_state
+                    print("\n \n")
+                    new_board.display()
+                    break
+                else:
+                    state0.board.pieces[i].move("up")
+        
+        
 
+def pruning(visited, new_state):
+    """
+    check if the same board has reached previously, True if not
+    """
+    for state in visited:
+        if state.board.grid == new_state.board.grid:
+            return False
+    return True
 
 
 
@@ -412,7 +455,7 @@ if __name__ == "__main__":
     
 
     #read the board from the file
-    board = read_from_file("testhrd_med1.txt")
+    board = read_from_file("testhrd_easy1.txt")
     board.display()
     state0 = State(board, 0, 0)
     #print(is_goal(state0))
