@@ -4,6 +4,7 @@ import time
 import argparse
 import sys
 
+
 #====================================================================================
 
 char_goal = '1'
@@ -306,83 +307,63 @@ def legal_move_check(i, board, direction):
             e = [(board.pieces[i].coord_x-1, board.pieces[i].coord_y)]
             return (x0, y0) in e or (x1, y1) in e
         elif direction == "right":
-            e = [(board.pieces[i].coord_x+2, board.pieces[i].coord_y)]
+            e = [(board.pieces[i].coord_x+1, board.pieces[i].coord_y)]
             return (x0, y0) in e or (x1, y1) in e
 
 
 
+def display_sol(state9):
+    print("\n \n \n")
+    while state9 != None:
+        state9.board.display()
+        print("\n")
+        state9 = state9.parent
+
 def dfs(state0):
     frontier = [state0]
     visited = [state0]
+    rslt = []
+    found = False
     while frontier != []:
         state0 = frontier.pop()
-        for i in range(10):
-            if legal_move_check(i, state0.board, "left"):
-                state0.board.pieces[i].move("left")
-                new_board = Board(state0.board.pieces)
-                new_state = State(new_board, state0.f+1, state0.depth+1)
-                if pruning(visited, new_state):#pruning
-                    new_state.parent = state0
-                    frontier.append(new_state)
-                    visited.append(new_state)
-                    state0 = new_state
-                    print("\n \n")
-                    new_board.display()
-                    break
-                else: 
-                    state0.board.pieces[i].move("right")
-            elif legal_move_check(i, state0.board, "up"):
-                state0.board.pieces[i].move("up")
-                new_board = Board(state0.board.pieces)
-                new_state = State(new_board, state0.f+1, state0.depth+1)
-                if pruning(visited, new_state):#pruning
-                    new_state.parent = state0
-                    frontier.append(new_state)
-                    visited.append(new_state)
-                    state0 = new_state
-                    print("\n \n")
-                    new_board.display()
-                    break
-                else:
-                    state0.board.pieces[i].move("down")
-            elif legal_move_check(i, state0.board, "right"):
-                state0.board.pieces[i].move("right")
-                new_board = Board(state0.board.pieces)
-                new_state = State(new_board, state0.f+1, state0.depth+1)
-                if pruning(visited, new_state):#pruning
-                    new_state.parent = state0
-                    frontier.append(new_state)
-                    visited.append(new_state)
-                    state0 = new_state
-                    print("\n \n")
-                    new_board.display()
-                    break
-                else:
-                    state0.board.pieces[i].move("left")
-            elif legal_move_check(i, state0.board, "down"):
-                state0.board.pieces[i].move("down")
-                new_board = Board(state0.board.pieces)
-                new_state = State(new_board, state0.f+1, state0.depth+1)
-                if pruning(visited, new_state):#pruning
-                    new_state.parent = state0
-                    frontier.append(new_state)
-                    visited.append(new_state)
-                    state0 = new_state
-                    print("\n \n")
-                    new_board.display()
-                    break
-                else:
-                    state0.board.pieces[i].move("up")
+        rslt = neighbouring(state0)
+        for state in rslt:
+            if is_goal(state):
+                found = True
+                print("found")
+                display_sol(state)
+                break;
+            if pruning(visited, state):
+                frontier.append(state)
+                visited.append(copy(state))
 
-        if frontier == []:
-            frontier.append(state0.parent)
+    if not found:
+        print("not found")
+        
 
-    if is_goal(state0):
-        print("found")
+def manhattan(state0):
+    for piece in state0.board.pieces:
+        if piece.is_goal:
+            return abs(1 - piece.coord_x) + abs(3 - piece.coord_y)
+        
 
+def astar(state0):
+    frontier = heapq()
+
+
+def copy(state0):
+    """
+    Perform a deep copy of a given state
+    """
+    copy_pieces = []
+    for piece in state0.board.pieces:
+        copy_pieces.append(Piece(piece.is_goal, piece.is_single, piece.coord_x, piece.coord_y, piece.orientation))
+    copy_board = Board(copy_pieces)
+    copy_state = State(copy_board, state0.f, state0.depth)
+    return copy_state
 
 def neighbouring(state0):
-    #temp = State(Board(state0.board.pieces), state0.f, state0.depth, state0.pa)
+    init = copy(state0)
     moves = []
     for j in range(9):
         for i in range(10):
@@ -395,10 +376,10 @@ def neighbouring(state0):
                     moves.append(new_state)
                     print("\n \n")
                     new_board.display()
-                    state0.board.pieces[i].move("right")
+                    state0 = copy(init)
                     break
                 else:
-                    state0.board.pieces[i].move("right")
+                    state0 = copy(init)
                     
             if legal_move_check(i, state0.board, "up"):
                 state0.board.pieces[i].move("up")
@@ -409,11 +390,10 @@ def neighbouring(state0):
                     moves.append(new_state)
                     print("\n \n")
                     new_board.display()
-                    state0.board.pieces[i].move("down")
-                    state0 = temp
+                    state0 = copy(init)
                     break
                 else:
-                    state0.board.pieces[i].move("down")
+                    state0 = copy(init)
                     
             if legal_move_check(i, state0.board, "right"):
                 state0.board.pieces[i].move("right")
@@ -424,10 +404,10 @@ def neighbouring(state0):
                     moves.append(new_state)
                     print("\n \n")
                     new_board.display()
-                    state0.board.pieces[i].move("left")
+                    state0 = copy(init)
                     break
                 else:
-                    state0.board.pieces[i].move("left")
+                    state0 = copy(init)
                     
             if legal_move_check(i, state0.board, "down"):
                 state0.board.pieces[i].move("down")
@@ -438,10 +418,11 @@ def neighbouring(state0):
                     moves.append(new_state)
                     print("\n \n")
                     new_board.display()
-                    state0.board.pieces[i].move("up")
+                    state0 = copy(init)
                     break
                 else:
-                    state0.board.pieces[i].move("up")
+                    state0 = copy(init)
+    return moves
                     
                 
 
@@ -454,7 +435,9 @@ def pruning(visited, new_state):
     check if the same board has reached previously, True if not
     """
     for state in visited:
-        if state.board.grid == new_state.board.grid:
+        if state.board.pieces == new_state.board.pieces:
+            return False
+        elif state.board.grid == new_state.board.grid:
             return False
     return True
 
@@ -493,10 +476,10 @@ if __name__ == "__main__":
     # board1 = Board([c, s0, s1, s2, s3, v0, v1, h0, h1, h2])
     # board1.display()
     # print("\n")
-    # c.move("right")
-    # board1 = Board([c, s0, s1, s2, s3, v0, v1, h0, h1, h2])
-    # board1.display()
-    # board1.find_empty()
+    
+    # print(board1.find_empty())
+    # #legalmove check
+    # print(legal_move_check(4, board1, "down"))
 
     # board2 = read_from_file("testhrd_easy1.txt")
     # board2.display()
@@ -532,11 +515,12 @@ if __name__ == "__main__":
     
 
     #read the board from the file
-    board = read_from_file("testhrd_hard1.txt")
+    #board = read_from_file("testhrd_easy1.txt")
+    board = read_from_file("toy1")
     board.display()
     state0 = State(board, 0, 0)
     #print(is_goal(state0))
     print("\n")
-    # dfs(state0)
-    neighbouring(state0)
-    #print(legal_move_check(9, board, "up"))
+    dfs(state0)
+    # neighbouring(state0)
+   
