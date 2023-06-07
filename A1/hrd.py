@@ -3,6 +3,7 @@ from heapq import heappush, heappop
 import time
 import argparse
 import sys
+import heapq
 
 
 #====================================================================================
@@ -175,6 +176,10 @@ class State:
         self.parent = parent
         self.id = hash(board)  # The id for breaking ties.
 
+    def __lt__(self, other):
+        return self.f < other.f
+
+
 
 
 
@@ -218,6 +223,30 @@ def read_from_file(filename):
     board = Board(pieces)
     
     return board
+
+def write_file(filename, state9):
+    """
+    Write boards to a given file.
+
+    :param filename: The name of the given file.
+    :type filename: str
+    :return: A loaded board
+    :rtype: Board
+    """
+    sol = []
+    sol_file = open(filename, "w")
+    while state9 != None:
+        sol.append(state9)
+        state9 = state9.parent
+    sol.reverse()
+    for state in sol:
+        for i, line in enumerate(state.board.grid):
+            for ch in line:
+                sol_file.write(ch)
+            sol_file.write("\n")
+        sol_file.write("\n")
+    sol_file.close()
+
 
 def legal_move_check(i, board, direction):
     x0, y0, x1, y1 = board.find_empty()
@@ -325,13 +354,16 @@ def dfs(state0):
     rslt = []
     found = False
     while frontier != []:
+        if found:
+            break
         state0 = frontier.pop()
-        rslt = neighbouring(state0)
+        rslt = neighbouring(copy(state0))
         for state in rslt:
             if is_goal(state):
                 found = True
                 print("found")
-                display_sol(state)
+                #display_sol(state)
+                write_file("sol.txt", state)
                 break;
             if pruning(visited, state):
                 frontier.append(state)
@@ -339,6 +371,8 @@ def dfs(state0):
 
     if not found:
         print("not found")
+    else:
+        print("end of solution")
         
 
 def manhattan(state0):
@@ -348,7 +382,31 @@ def manhattan(state0):
         
 
 def astar(state0):
-    frontier = heapq()
+    frontier = []
+    heapq.heapify(frontier)
+    heapq.heappush(frontier, state0)
+    visited = [state0]
+    rslt = []
+    found = False
+    temp = heapq.heappop(frontier)
+    while temp is not None:
+        if found:
+            break
+        rslt = neighbouring(copy(temp))
+        for state in rslt:
+            #add heuristic value to f
+            state.f += manhattan(state)
+            if is_goal(state):
+                found = True
+                print("found")
+                #display_sol(state)
+                write_file("sol.txt", state)
+                break;
+            if pruning(visited, state):
+                heapq.heappush(frontier, state)
+                visited.append(copy(state))
+        if not found:
+            temp = heapq.heappop(frontier)
 
 
 def copy(state0):
@@ -359,13 +417,13 @@ def copy(state0):
     for piece in state0.board.pieces:
         copy_pieces.append(Piece(piece.is_goal, piece.is_single, piece.coord_x, piece.coord_y, piece.orientation))
     copy_board = Board(copy_pieces)
-    copy_state = State(copy_board, state0.f, state0.depth)
+    copy_state = State(copy_board, state0.f, state0.depth, state0.parent)
     return copy_state
 
 def neighbouring(state0):
     init = copy(state0)
     moves = []
-    for j in range(9):
+    for j in range(5):
         for i in range(10):
             if legal_move_check(i, state0.board, "left"):
                 state0.board.pieces[i].move("left")
@@ -374,8 +432,7 @@ def neighbouring(state0):
                 new_state.parent = state0
                 if pruning(moves, new_state):
                     moves.append(new_state)
-                    print("\n \n")
-                    new_board.display()
+                    
                     state0 = copy(init)
                     break
                 else:
@@ -388,8 +445,7 @@ def neighbouring(state0):
                 new_state.parent = state0
                 if pruning(moves, new_state):
                     moves.append(new_state)
-                    print("\n \n")
-                    new_board.display()
+                    
                     state0 = copy(init)
                     break
                 else:
@@ -402,8 +458,7 @@ def neighbouring(state0):
                 new_state.parent = state0
                 if pruning(moves, new_state):
                     moves.append(new_state)
-                    print("\n \n")
-                    new_board.display()
+                    
                     state0 = copy(init)
                     break
                 else:
@@ -416,8 +471,7 @@ def neighbouring(state0):
                 new_state.parent = state0
                 if pruning(moves, new_state):
                     moves.append(new_state)
-                    print("\n \n")
-                    new_board.display()
+                    
                     state0 = copy(init)
                     break
                 else:
@@ -437,7 +491,11 @@ def pruning(visited, new_state):
     for state in visited:
         if state.board.pieces == new_state.board.pieces:
             return False
+        elif state.id == new_state.id:
+            return False
         elif state.board.grid == new_state.board.grid:
+            return False
+        elif hash(state.board) == hash(new_state.board):
             return False
     return True
 
@@ -521,6 +579,7 @@ if __name__ == "__main__":
     state0 = State(board, 0, 0)
     #print(is_goal(state0))
     print("\n")
-    dfs(state0)
-    # neighbouring(state0)
+    #dfs(state0)
+    astar(state0)
+    #neighbouring(state0)
    
