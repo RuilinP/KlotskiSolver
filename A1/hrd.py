@@ -4,6 +4,7 @@ import time
 import argparse  
 import sys  
 import heapq  
+import time
   
   
 #====================================================================================  
@@ -247,7 +248,7 @@ def write_file(filename, state9):
         sol_file.write("\n")
         count+=1  
     sol_file.close()
-    print(str(count-1) + " moves\n")  
+    print(str(count-1) + " moves using " + str(time.time() - start_time)+ "s \n" )  
   
   
 def legal_move_check(i, board, direction):  
@@ -593,6 +594,7 @@ if __name__ == "__main__":
     board.display()  
     state0 = State(board, 0, 0)
     print("\n")  
+    start_time = time.time()
     if args.algo == "dfs":
         dfs(state0, args.outputfile)
     elif args.algo == "astar":
