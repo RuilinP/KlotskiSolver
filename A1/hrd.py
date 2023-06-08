@@ -592,7 +592,7 @@ if __name__ == "__main__":
     print("\n")  
     board = read_from_file(args.inputfile)
     board.display()  
-    state0 = State(board, 0, 0)
+    state0 = State(board, manhattan(board), 0)
     print("\n")  
     start_time = time.time()
     if args.algo == "dfs":
