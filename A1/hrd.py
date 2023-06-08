@@ -350,7 +350,7 @@ def display_sol(state9):
         print("\n")  
         state9 = state9.parent  
   
-def dfs(state0):  
+def dfs(state0, filename="sol.txt"):  
     frontier = [state0]  
     visited = set()
     visited.add(grid_hashing(state0.board.grid))  
@@ -366,7 +366,7 @@ def dfs(state0):
                 found = True  
                 print("found")  
                 #display_sol(state)  
-                write_file("sol.txt", state)  
+                write_file(filename, state)  
                 break;  
             
             frontier.append(state)  
@@ -384,7 +384,7 @@ def manhattan(state0):
             return abs(1 - piece.coord_x) + abs(3 - piece.coord_y)  
           
   
-def astar(state0):  
+def astar(state0, filename="sol.txt"):  
     frontier = []  
     heapq.heapify(frontier)  
     heapq.heappush(frontier, state0)  
@@ -404,7 +404,7 @@ def astar(state0):
                 found = True  
                 print("found")  
                 #display_sol(state)  
-                write_file("sol.txt", state)  
+                write_file(filename, state)  
                 break;  
             #new_hash = grid_hashing(state.board.grid)
               
@@ -562,42 +562,53 @@ if __name__ == "__main__":
     # board2.find_empty()  
   
   
-    # parser = argparse.ArgumentParser()  
-    # parser.add_argument(  
-    #     "--inputfile",  
-    #     type=str,  
-    #     required=True,  
-    #     help="The input file that contains the puzzle."  
-    # )  
-    # parser.add_argument(  
-    #     "--outputfile",  
-    #     type=str,  
-    #     required=True,  
-    #     help="The output file that contains the solution."  
-    # )  
-    # parser.add_argument(  
-    #     "--algo",  
-    #     type=str,  
-    #     required=True,  
-    #     choices=['astar', 'dfs'],  
-    #     help="The searching algorithm."  
-    # )  
-    # args = parser.parse_args()  
-    # print(args.inputfile)  
-    # print(args.outputfile)  
-    # print(args.algo)  
+    parser = argparse.ArgumentParser()  
+    parser.add_argument(  
+        "--inputfile",  
+        type=str,  
+        required=True,  
+        help="The input file that contains the puzzle."  
+    )  
+    parser.add_argument(  
+        "--outputfile",  
+        type=str,  
+        required=True,  
+        help="The output file that contains the solution."  
+    )  
+    parser.add_argument(  
+        "--algo",  
+        type=str,  
+        required=True,  
+        choices=['astar', 'dfs'],  
+        help="The searching algorithm."  
+    )  
+    args = parser.parse_args()  
+    print(args.inputfile)  
+    print("\n")
+    print(args.outputfile) 
+    print("\n") 
+    print(args.algo)
+    print("\n")  
+    board = read_from_file(args.inputfile)
+    board.display()  
+    state0 = State(board, 0, 0)
+    print("\n")  
+    if args.algo == "dfs":
+        dfs(state0, args.outputfile)
+    elif args.algo == "astar":
+        astar(state0, args.outputfile)
       
       
       
   
     #read the board from the file  
-    board = read_from_file("testhrd_hard1.txt")  
+    #board = read_from_file("testhrd_hard1.txt")  
     #board = read_from_file("toy1")  
-    board.display()  
-    state0 = State(board, 0, 0)  
+    #board.display()  
+    #state0 = State(board, 0, 0)  
     #print(is_goal(state0))  
-    print("\n")  
-    dfs(state0)  
+    #print("\n")  
+    #dfs(state0)  
     #astar(state0)
     #visited = set()  
     #neighbouring(visited, state0)  
