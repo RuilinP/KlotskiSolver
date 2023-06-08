@@ -378,8 +378,8 @@ def dfs(state0, filename="sol.txt"):
     #     print("end of solution")  
           
   
-def manhattan(state0):  
-    for piece in state0.board.pieces:  
+def manhattan(board):  
+    for piece in board.pieces:  
         if piece.is_goal:  
             return abs(1 - piece.coord_x) + abs(3 - piece.coord_y)  
           
@@ -399,7 +399,7 @@ def astar(state0, filename="sol.txt"):
         rslt = neighbouring(visited, copy(temp))  
         for state in rslt:  
             #add heuristic value to f  
-            state.f += manhattan(state)  
+            state.f = state.depth + manhattan(state.board)  
             if is_goal(state):  
                 found = True  
                 print("found")  
@@ -605,7 +605,7 @@ if __name__ == "__main__":
     #board = read_from_file("testhrd_hard1.txt")  
     #board = read_from_file("toy1")  
     #board.display()  
-    #state0 = State(board, 0, 0)  
+    #state0 = State(board, manhattan(board), 0)  
     #print(is_goal(state0))  
     #print("\n")  
     #dfs(state0)  
