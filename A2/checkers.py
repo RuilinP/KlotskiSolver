@@ -72,8 +72,8 @@ class State:
                 self.blue_king_left += 1
         self.display()
 
-    def valid_move(self, old_row, old_col, new_row, new_col):
-        player = self.board[old_row][old_col]
+    def valid_move(self, player, old_row, old_col, new_row, new_col):
+        #player = self.board[old_row][old_col]
         if self.board[new_row][new_col] != '.':
             return False, None
         
@@ -116,25 +116,31 @@ class State:
                     new_loc = [i[0] + x, i[1] + y]
                     if (new_loc[0] < self.width) & (new_loc[0] >= 0) & (new_loc[1] < self.height) & (new_loc[1] >= 0):
                         
-                        is_valid_move, jump = self.valid_move(i[0], i[1], new_loc[0], new_loc[1])
+                        is_valid_move, jump = self.valid_move(self.board[i[0]][i[1]], i[0], i[1], new_loc[0], new_loc[1])
                         if is_valid_move:
                             moves.append([i, [i[0] + x, i[1] + y], None])
             can_jump = True
+            
             old_loc = i
             jumped_list = [] # multiple jumps until no more jump can be made
+            ban_direction = []
             while can_jump:
                 can_jump = False
+                jump_found = False
                 for x in [-2, 2]:
                     for y in [-2, 2]:
-                        new_loc = [old_loc[0] + x, old_loc[1] + y]
-                        if (new_loc[0] < self.width) & (new_loc[0] >= 0) & (new_loc[1] < self.height) & (new_loc[1] >= 0):
-                            is_valid_move, jump = self.valid_move(i[0], i[1], new_loc[0], new_loc[1])
+                        if not jump_found and ban_direction != [x,y]:
+                            new_loc = [old_loc[0] + x, old_loc[1] + y]
+                            if (new_loc[0] < self.width) & (new_loc[0] >= 0) & (new_loc[1] < self.height) & (new_loc[1] >= 0):
+                                is_valid_move, jump = self.valid_move(self.board[i[0]][i[1]], old_loc[0], old_loc[1], new_loc[0], new_loc[1])
 
-                            if is_valid_move:
-                                can_jump = True
-                                jumped_list.append(jump)
-                                moves.append([i, new_loc, jumped_list])
-                                old_loc = new_loc
+                                if is_valid_move:
+                                    can_jump = True
+                                    jump_found = True
+                                    jumped_list.append(jump)
+                                    moves.append([i, new_loc, jumped_list])
+                                    old_loc = new_loc
+                                    ban_direction = [-x, -y]
             return moves
 
 
@@ -219,7 +225,7 @@ if __name__ == '__main__':
     # while state.winner() is None:
     #     evaluation, next_moves = alpha_beta_search(initial_board, 3, turn)
     #print(state.valid_move(6, 3, 4, 1))
-    print(state.get_valid_moves('r'))
+    print(state.get_valid_moves('b'))
 
 
     #sys.stdout = sys.__stdout__
