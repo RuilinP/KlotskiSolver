@@ -110,6 +110,7 @@ class State:
 
     def get_valid_moves(self, player):
         moves = []
+        
         for i in self.get_all_pieces(player):
             for x in [-1, 1]:
                 for y in [-1, 1]:
@@ -120,7 +121,7 @@ class State:
                         if is_valid_move:
                             moves.append([i, [i[0] + x, i[1] + y], None])
             can_jump = True
-            
+            temp = None
             old_loc = i
             jumped_list = [] # multiple jumps until no more jump can be made
             ban_direction = []
@@ -141,8 +142,9 @@ class State:
                                     temp = [i, new_loc, jumped_list]
                                     old_loc = new_loc
                                     ban_direction = [-x, -y]
-            moves.append(temp)
-            return moves
+            if temp is not None:
+                moves.append(temp)
+        return moves
 
 
     def winner(self):
@@ -226,7 +228,7 @@ if __name__ == '__main__':
     # while state.winner() is None:
     #     evaluation, next_moves = alpha_beta_search(initial_board, 3, turn)
     #print(state.valid_move(6, 3, 4, 1))
-    print(state.get_valid_moves('b'))
+    print(state.get_valid_moves('r'))
 
 
     #sys.stdout = sys.__stdout__
