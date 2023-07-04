@@ -138,9 +138,10 @@ class State:
                                     can_jump = True
                                     jump_found = True
                                     jumped_list.append(jump)
-                                    moves.append([i, new_loc, jumped_list])
+                                    temp = [i, new_loc, jumped_list]
                                     old_loc = new_loc
                                     ban_direction = [-x, -y]
+            moves.append(temp)
             return moves
 
 
